@@ -1,5 +1,6 @@
 import selectors
 from socket import socket
+from network.connection import Connection
 class MyServer:
     def __init__(self,host,port):
         self.host = host
@@ -20,22 +21,20 @@ class MyServer:
 
         selector.register(s,selectors.EVENT_READ,data={"type": "listener"})                                 # register the new socket to selector to monitor read events
 
+
+
         while True:                        
             s2 = selector.select()                                                                          # This will block until there is an event on the socket
             for key,_ in s2:
                 if key.data["type"] == "listener":                                                          # New connection event
-                    client_info = key.fileobj.accept()                                                      # accept the new connection
+                    client_info = s.accept()                                                      # accept the new client connection
                     print("Connection from:",client_info[1])
-                    selector.register(client_info[0], selectors.EVENT_READ, data={"type": "client"})        # register the new client socket to selector to monitor read events
+                    conn = Connection(client_info[0],selector)                                              # create a Connection object to handle this client
+                    selector.register(client_info[0], selectors.EVENT_READ, data={"type":"client", "conn": conn})   # register the new client socket to selector with Connection object 
                 elif key.data["type"] == "client":                        # Data from existing client
+                    conn = key.data["conn"]
                     try:
-                        data = key.fileobj.recv(1024)                         # receive data or close from the client
+                        conn.handle_connection()                                      # handle the connection
                     except Exception as e:
-                        print("Error receiving data:", e)
-                        data = None
-                    if not data:                                          # if data is empty, the client has closed the connection
-                        selector.unregister(key.fileobj)                  # unregister the socket from selector
-                        key.fileobj.close()                               # close the socket
-                        print("Client disconnected")
-                    else:
-                        print("Received data from client:", data)
+                        print("Error handling connection:", e)
+
