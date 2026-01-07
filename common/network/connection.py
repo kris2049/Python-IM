@@ -6,12 +6,13 @@ from common.protocol.message import Message
 from common.protocol.constants import HEADER_SIZE, MSG_ID_SIZE, TIMESTAMP_SIZE, LENGTH_SIZE, TIMESTAMP_IDX, PAYLOAD_LEN_IDX
 from common.protocol.codec import Codec
 class Connection:
-    def __init__(self, sock: socket, selector: None):
+    def __init__(self, sock: socket, selector: None, handler=None):
 
         self.sock = sock
         self.read_buffer = b""                                             # Buffer to hold incoming data
         self.selector = selector
         self.write_buffer = b""                                            # Buffer to hold sending data
+        self.handler = handler                                            # Message handler callback
 
         # self.alive = True                                             # Connection status
 
@@ -102,15 +103,22 @@ class Connection:
         """Process the decoded message."""
         print(f"Received message ID: {message.header.msg_id}, Timestamp: {message.header.timestamp}, Length: {message.header.length}, Payload: {message.payload}")
 
-        # Server sends messages to the client
-        st = "Hello, client!"
-        data = st.encode('utf-8')
-        timestamp = time.time()
-        length = len(data)
+        if self.handler:
+            self.handler(self,message)                  # Why "self" needs to be passed? Because the upper level might need to access Connection's attributes.
+        
+        else:
+            # Default message handling
+            print("No handler found for message.")
 
-        header = Message.Header(1, timestamp, length)
-        rpl_msg = Message(header, data)
-        self.send_message(rpl_msg)
+        # Server sends messages to the client
+        # st = "Hello, client!"
+        # data = st.encode('utf-8')
+        # timestamp = time.time()
+        # length = len(data)
+
+        # header = Message.Header(1, timestamp, length)
+        # rpl_msg = Message(header, data)
+        # self.send_message(rpl_msg)
 
 
 
