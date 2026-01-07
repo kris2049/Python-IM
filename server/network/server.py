@@ -9,6 +9,7 @@ class MyServer:
                                                                 # input("Server started on {}:{}. Press Enter to stop.".format(self.host,self.port))
         s = socket()                                            # create a socket object
         s.bind((self.host,self.port))                           # bind to the port. Only registery, not listening yet
+        s.setblocking(False)
         s.listen()                                              # Tell the kenel we are ready to accept connections. listen() doesn't block
         #                                                       # Kernel will maintain two queues: 
         #                                                       # 1. incomplete connections(The SYN package from client and TCP connections during 3 times hand shake) 
@@ -25,16 +26,23 @@ class MyServer:
 
         while True:                        
             s2 = selector.select()                                                                          # This will block until there is an event on the socket
-            for key,_ in s2:
-                if key.data["type"] == "listener":                                                          # New connection event
-                    client_info = s.accept()                                                      # accept the new client connection
-                    print("Connection from:",client_info[1])
-                    conn = Connection(client_info[0],selector)                                              # create a Connection object to handle this client
-                    selector.register(client_info[0], selectors.EVENT_READ, data={"type":"client", "conn": conn})   # register the new client socket to selector with Connection object 
-                elif key.data["type"] == "client":                        # Data from existing client
+            for key,event_mask in s2:
+                if event_mask & selectors.EVENT_READ:
+                    if key.data["type"] == "listener":                                                          # New connection event
+                        client_info = s.accept()                                                      # accept the new client connection
+                        print("Connection from:",client_info[1])
+                        client_info[0].setblocking(False)
+                        conn = Connection(client_info[0],selector)                                              # create a Connection object to handle this client
+                        selector.register(client_info[0], selectors.EVENT_READ, data={"type":"client", "conn": conn})   # register the new client socket to selector with Connection object 
+                    elif key.data["type"] == "client":                        # Data from existing client
+                        conn = key.data["conn"]
+                        try:
+                            conn.handle_connection(event_mask)                                      # handle the connection
+                        except Exception as e:
+                            print("Error handling connection:", e)
+                elif event_mask & selectors.EVENT_WRITE:
                     conn = key.data["conn"]
                     try:
-                        conn.handle_connection()                                      # handle the connection
+                        conn.handle_connection(event_mask)
                     except Exception as e:
-                        print("Error handling connection:", e)
-
+                        print("Error handling connection:",e)
