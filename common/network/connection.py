@@ -1,17 +1,12 @@
 from socket import socket
 import selectors
-import sys
-import os
 import time
 
-# 添加项目根目录到 Python 路径
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
-from protocol.message import Message
-from protocol.constants import HEADER_SIZE, MSG_ID_SIZE, TIMESTAMP_SIZE, LENGTH_SIZE, TIMESTAMP_IDX, PAYLOAD_LEN_IDX
-from protocol.codec import Codec
+from common.protocol.message import Message
+from common.protocol.constants import HEADER_SIZE, MSG_ID_SIZE, TIMESTAMP_SIZE, LENGTH_SIZE, TIMESTAMP_IDX, PAYLOAD_LEN_IDX
+from common.protocol.codec import Codec
 class Connection:
-    def __init__(self, sock: socket, selector: selectors.DefaultSelector):
+    def __init__(self, sock: socket, selector: None):
 
         self.sock = sock
         self.read_buffer = b""                                             # Buffer to hold incoming data

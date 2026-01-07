@@ -1,15 +1,10 @@
 from asyncio import wait
 from socket import socket
-import sys
-import os
 import time
 
-# 添加项目根目录到 Python 路径
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
-from protocol.message import Message
-from protocol.codec import Codec
-from server.network.connection import Connection
+from common.protocol.message import Message
+from common.protocol.codec import Codec
+from common.network.connection import Connection
 class MyClient:
     def __init__(self, host, port,name):
         self.name = name

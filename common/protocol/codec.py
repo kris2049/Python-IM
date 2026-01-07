@@ -1,6 +1,6 @@
 import struct
-from protocol.message import Message
-from protocol.constants import HEADER_SIZE, MSG_ID_SIZE, TIMESTAMP_SIZE, LENGTH_SIZE, TIMESTAMP_IDX, PAYLOAD_LEN_IDX
+from common.protocol.message import Message
+from common.protocol.constants import HEADER_SIZE, MSG_ID_SIZE, TIMESTAMP_SIZE, LENGTH_SIZE, TIMESTAMP_IDX, PAYLOAD_LEN_IDX
 class Codec:
     """
         A class to represent the codec for encoding and decoding messages.

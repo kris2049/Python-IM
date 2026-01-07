@@ -1,4 +1,4 @@
-from network.client import MyClient
+from client.client import MyClient
 
 if __name__ == "__main__":
     client_num = 5

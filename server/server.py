@@ -1,6 +1,6 @@
 import selectors
 from socket import socket
-from network.connection import Connection
+from common.network.connection import Connection
 class MyServer:
     def __init__(self,host,port):
         self.host = host
