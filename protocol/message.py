@@ -1,12 +1,6 @@
 
 class Message:
     """A class to represent a message in the IM protocol.
-
-    | header | payload | : 
-
-    | header | : msg_id(1 byte) | timestamp(8 bytes, unix time) | length(int type, 4 bytes) |
-
-    | payload | : The first 1 byte is msg_type; data, encoded in bytes,'length' field in header is determined by the length of payload.
     """
 
     class Header:
