@@ -1,10 +1,13 @@
 from common.network.connection import Connection
 from common.protocol.message import Message
 from common.protocol.constants import MSG_TYPE_CHAT, MSG_TYPE_HEARTBEAT, MSG_TYPE_ACK, MSG_TYPE_LOGIN
+from server.user_manager import UserManager
+
 
 class Dispatcher:
-    def __init__(self):
+    def __init__(self, user_manager: UserManager):
         self.connections = []
+        self.user_manager = user_manager
         self.handlers = {
             MSG_TYPE_CHAT: self.handle_chat_message,
             MSG_TYPE_HEARTBEAT: self.handle_heartbeat,
@@ -26,7 +29,9 @@ class Dispatcher:
     
     def handle_chat_message(self, conn: Connection, message: Message):
         print(f"Handling chat message: {message.payload}")
-        # TODO: Implement chat message logic here
+        
+        print("broadcasting message to other users")
+        self.user_manager.brodcast_message(message, conn)
 
     def handle_heartbeat(self, conn: Connection, message: Message):
         print("Handling heartbeat message")
@@ -35,4 +40,4 @@ class Dispatcher:
     def handle_ack_message(self, conn: Connection, message: Message):
         print(f"Handling ACK message: {message.payload}")
         # TODO: Implement ACK logic here
-        
+

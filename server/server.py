@@ -2,11 +2,13 @@ import selectors
 from socket import socket
 from common.network.connection import Connection
 from server.dispatcher import Dispatcher
+from server.user_manager import UserManager
 class MyServer:
     def __init__(self,host,port):
         self.host = host
         self.port = port
-        self.dispatcher = Dispatcher()
+        self.user_manager = UserManager()
+        self.dispatcher = Dispatcher(self.user_manager)
     def start(self):
                                                                 # input("Server started on {}:{}. Press Enter to stop.".format(self.host,self.port))
         s = socket()                                            # create a socket object
@@ -34,7 +36,9 @@ class MyServer:
                         client_info = s.accept()                                                      # accept the new client connection
                         print("Connection from:",client_info[1])
                         client_info[0].setblocking(False)
-                        conn = Connection(client_info[0],selector,self.dispatcher.dispatch)                                              # create a Connection object to handle this client
+                        conn = Connection(client_info[0],selector,self.dispatcher.dispatch)   
+                        self.user_manager.add_user(conn)
+                        self.user_manager.list_users()                                           # create a Connection object to handle this client
                         selector.register(client_info[0], selectors.EVENT_READ, data={"type":"client", "conn": conn})   # register the new client socket to selector with Connection object 
                     elif key.data["type"] == "client":                        # Data from existing client
                         conn = key.data["conn"]
